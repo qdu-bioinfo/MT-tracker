@@ -15,7 +15,7 @@ MT-Tracker requires Parallel-Meta-Suite, please refer to https://github.com/qdu-
 **a. Download the package**
 
 ```
-git clone https://github.com/qdu-bioinfo/XXXX.git	
+git clone https://github.com/qdu-bioinfo/MT-tracker.git
 ```
 
 **b. Install by installer**
