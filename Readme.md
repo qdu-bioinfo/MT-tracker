@@ -103,4 +103,4 @@ PM-Mt-tracker -T samples.OTU.Abd -o samples.mtt
 PM-Mt-tracker -g samples.mtt samples.meta -o output.txt
 ```
 
-For other options, use PM-Mt-tracker -h to view
+For other options, use PM-Mt-tracker -h to view.
