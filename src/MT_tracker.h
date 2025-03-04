@@ -23,7 +23,7 @@
 #ifndef MT_TRACKER_H
 #define MT_TRACKER_H
 
-#define REG_SIZE 150
+#define REG_SIZE 70
 
 
 using namespace std;
@@ -356,11 +356,21 @@ int _Mt_Tracker::Load_order(){
 
 float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vector<float>> ANS_info){
 
-    float Reg_1[REG_SIZE];
-    float Reg_2[REG_SIZE];
-    int vir[REG_SIZE];
+    float Reg_1[REG_SIZE] = {0};
+    float Reg_2[REG_SIZE] = {0};
+    int vir[REG_SIZE] = {0};
     float total = 0;
-
+//    // 输出 ANS_info 的内容
+//    std::cout << "ANS_info content:" << std::endl;
+//    for (const auto& row : ANS_info) {
+//        for (size_t col = 0; col < row.size(); ++col) {
+//            std::cout << row[col];
+//            if (col < row.size() - 1) {
+//                std::cout << ", ";
+//            }
+//        }
+//        std::cout << std::endl;
+//    }
     for(int i = 0, k = 0; i < OrderN; i++){
 
         int order_1 = Order_1[i];
@@ -375,7 +385,7 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
         float dist_1 = 1- Dist_1[i];//1-进化树距离
         float dist_2 = 1- Dist_2[i];
         float abd = ANS_info[k][3];
-
+        vir[order_d] = i;
 
 
         float c1_1 = 0;//第一个菌，在第一个菌群的丰度
@@ -398,7 +408,7 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
         if (order_2 >= 0){
 
             c2_1 = Abd_1[order_2];
-            c1_2 = Abd_2[order_2];
+            c2_2 = Abd_2[order_2];
 
         }
         else {
@@ -413,49 +423,28 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
         total += min_1;
         total += min_2;
 
-        //The abundance of common ancestors is added to the node during calculation
-        if(order_1>=0&&order_2>=0){
-            if(order_1==child_left&&order_2==child_right){
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2 + abd;
-                k++;
-            }
-            else{
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2;
-            }
-        }
-        if(order_1<0&&order_2<0){
-            if(vir[order_1+ REG_SIZE]==child_left&&vir[order_2+ REG_SIZE]==child_right){
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2 + abd;
-                k++;
-            }
-            else{
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2;
-            }
-        }
-        if(order_1>=0&&order_2<0){
-            if(order_1==child_left&&vir[order_2+ REG_SIZE]==child_right){
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2 + abd;
-                k++;
-            }
-            else{
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2;
-            }
-        }
-        if(order_1<0&&order_2>=0){
-            if(vir[order_1+ REG_SIZE]==child_left&&order_2==child_right){
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2 + abd;
-                k++;
-            }
-            else{
-                Reg_2[order_d] = (c1_2 - min_1) * dist_1 + (c2_2 - min_2) * dist_2;
-            }
-        }
-        Reg_1[order_d] = (c1_1 - min_1) * dist_1 + (c2_1 - min_2) * dist_2;
+        // 统一处理节点匹配逻辑
+        auto get_node = [&](int order) {
+            return (order >= 0) ? order : vir[order + REG_SIZE];
+        };
+        const bool is_match = (get_node(order_1) == child_left) &&
+                              (get_node(order_2) == child_right);
 
+        // 计算基准值
+        const float base_value = (c1_2 - min_1) * dist_1
+                                 + (c2_2 - min_2) * dist_2;
+
+        // 更新寄存器值
+        Reg_2[order_d] = base_value + (is_match ? abd : 0);
+        Reg_1[order_d] = (c1_1 - min_1) * dist_1
+                         + (c2_1 - min_2) * dist_2;
+
+        // 更新k值
+        k += is_match ? 1 : 0;
     }
-	
+
     if(total!=0){
-        total /= 100.0000; 
+        total /= 100.0000;
     }
     total = (total > 1.0) ? 1 : total;
     total = (total < 0.0) ? 0 : total;
@@ -465,10 +454,10 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
 
 tuple<vector<float>, vector<float>, vector<pair<int, int>>> _Mt_Tracker::myFunction(float* Abd_1, float* Abd_2) {
 
-    float Reg[REG_SIZE];
-    float Reg_1[REG_SIZE];
-    float Reg_2[REG_SIZE];
-    int vir[OrderN];//Virtual code, if it is a leaf node, then it is order 1 or 2, if it is an ancestor node, then it is equal to i
+    float Reg[REG_SIZE] = {0};
+    float Reg_1[REG_SIZE] = {0};
+    float Reg_2[REG_SIZE] = {0};
+    int vir[OrderN] = {0};//Virtual code, if it is a leaf node, then it is order 1 or 2, if it is an ancestor node, then it is equal to i
     float temp_1, temp_2;
 
     vector<float> ANS_Leaf(OrderN + 1); // Vector array used to store leaf node abundance
@@ -483,7 +472,7 @@ tuple<vector<float>, vector<float>, vector<pair<int, int>>> _Mt_Tracker::myFunct
         int order_d = Order_d[i] + REG_SIZE;
         float dist_1 = 1- Dist_1[i];
         float dist_2 = 1- Dist_2[i];
-
+        vir[order_d] = i;
         float c1_1;
         float c1_2;
 
@@ -543,22 +532,27 @@ tuple<vector<float>, vector<float>, vector<pair<int, int>>> _Mt_Tracker::myFunct
 
 
 
-        if(order_1<0 && order_2 < 0){
-            ans.emplace_back(vir[order_1+ REG_SIZE],vir[order_2+ REG_SIZE]);
-        }
-        if(order_1>=0&&order_2<0){
-            ans.emplace_back(order_1,vir[order_2+ REG_SIZE]);
-        }
-        if(order_1>=0&&order_2>=0){
-            ans.emplace_back(order_1,order_2);
-        }
-        if(order_1<0&&order_2>=0){
-            ans.emplace_back(vir[order_1+ REG_SIZE],order_2);
-        }
+//        if(order_1<0 && order_2 < 0){
+//            ans.emplace_back(vir[order_1+ REG_SIZE],vir[order_2+ REG_SIZE]);
+//        }
+//        if(order_1>=0&&order_2<0){
+//            ans.emplace_back(order_1,vir[order_2+ REG_SIZE]);
+//        }
+//        if(order_1>=0&&order_2>=0){
+//            ans.emplace_back(order_1,order_2);
+//        }
+//        if(order_1<0&&order_2>=0){
+//            ans.emplace_back(vir[order_1+ REG_SIZE],order_2);
+//        }
+        auto getNode = [&vir](int order) -> int {
+            return (order >= 0) ? order : vir[order + REG_SIZE];
+        };
+        ans.emplace_back(getNode(order_1), getNode(order_2));
 
-        vir[order_d] = i;
 
-        ANS_NLeaf[i] = (Reg[order_d] < 0.00001) ? 0 : Reg[order_d];
+
+
+        ANS_NLeaf[i] = (Reg[order_d] < 0.0000001) ? 0 : Reg[order_d];
 
         Reg_1[order_d] = temp_1 - Reg[order_d];
         Reg_2[order_d] = temp_2 - Reg[order_d];

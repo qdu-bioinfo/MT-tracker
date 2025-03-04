@@ -157,7 +157,7 @@ void display_progress_bar(std::atomic<long> &progress, long total, int bar_width
                   << postfix[postfix_index];
         std::cout.flush();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     std::cout << "\r[" << std::string(bar_width, '#') << "] 100.00% " << std::endl;
@@ -268,12 +268,12 @@ void Single_Comp2(){
         //Calculate the similarity between Abd2 and ANS
         float sim2 = mt_tracker.Ans_sim(Abd2, leaf_abd, count, ANS_info);
         if (Is_sim)
-            cout <<"distance between sample1 and virtual ancestor is "<< sim1<<endl;
-            cout <<"distance between sample2 and virtual ancestor is "<< sim2<<endl;
+            cout <<"distance between sample1 and virtual ancestor is "<<1- sim1<<endl;
+            cout <<"distance between sample2 and virtual ancestor is "<<1- sim2<<endl;
             if (sim1 < sim2) {
-                cout << "sample1 -> sample2" << endl;
-            } else if (sim1 > sim2) {
                 cout << "sample1 <- sample2" << endl;
+            } else if (sim1 > sim2) {
+                cout << "sample1 -> sample2" << endl;
             } else {
                 cout << "sample1 <-> sample2" << endl; // 如果相等，输出两者平等关系
             }
@@ -298,10 +298,12 @@ void Multi_Comp(){
     file_count = Load_List(Listfilename.c_str(), file_list, sam_name, Listprefix);
             
     //load abd
-    float **Abd = new float * [file_count];
+    const int leafN = mt_tracker.Get_LeafN();
+    vector<float> Abd_flat(file_count * leafN);
+    vector<float*> Abd(file_count);
     int mapped_otu_count = 0;
     for (int i = 0; i < file_count; i ++){
-        Abd[i] = new float [mt_tracker.Get_LeafN()];
+        Abd[i] = &Abd_flat[i * leafN];
         mapped_otu_count = mt_tracker.Load_abd(file_list[i].c_str(), Abd[i], Is_cp_correct);
         if (mapped_otu_count == 0) {
             cerr << "Error: Failed to map OTUs/Sp for file: " << file_list[i].c_str() << endl;
@@ -346,12 +348,11 @@ void Multi_Comp(){
         long n = order_n[i];
         long p = m * (long) file_count + n - (1 + m + 1) * (m + 1) / 2;
 
-        tuple<vector<float>, vector<float>, vector<pair<int, int>>> result = mt_tracker.myFunction(Abd[m], Abd[n]);
         vector<float> leaf_abd;//Leaf node abundance
         vector<float> ans_abd;//Ancestral node abundance
         vector<pair<int,int>> vir_id;//Virtual code
 
-        tie(leaf_abd, ans_abd, vir_id)=result;
+        tie(leaf_abd, ans_abd, vir_id)= mt_tracker.myFunction(Abd[m], Abd[n]);
         float sum = 0;
         for(int i=0; i< k; i++){
             sum += (i < leaf_abd.size()) ? leaf_abd[i] : 0;
@@ -371,6 +372,7 @@ void Multi_Comp(){
             }
         }
 
+
         vector<vector<float>> ANS_info;//Public Ancestral node abundance and its child node IDs
         int count = mt_tracker.ANS_count(vir_id, ans_abd, k, ANS_info);//Number of common ancestors
 
@@ -381,7 +383,7 @@ void Multi_Comp(){
             //Calculate the similarity between Abd2 and ANS
             float sim2 = mt_tracker.Ans_sim(Abd[n], leaf_abd, count, ANS_info);
             if (Is_sim)
-                sim_matrix[p] = (sim1 - sim2)*(sim1 + sim2);//Multiply by a weight
+                sim_matrix[p] = sim1 * sim1 - sim2 * sim2;//Multiply by a weight
             else
                 sim_matrix[p] = sim1 - sim2 + 1;
         }
@@ -397,9 +399,9 @@ void Multi_Comp(){
     cout << endl;
     Output_Matrix(Outfilename.c_str(), file_count, &sim_matrix, Is_sim, sam_name);
 
-    for (int i = 0; i < file_count; i ++)
-        delete [] Abd[i];
-    delete [] Abd;
+//    for (int i = 0; i < file_count; i ++)
+//        delete [] Abd[i];
+//    delete [] Abd;
     
 
      }
@@ -460,12 +462,11 @@ void Multi_Comp_Table(_Table_Format abd_table){
         long n = order_n[i];
         long p = m * (long) file_count + n - (1 + m + 1) * (m + 1) / 2;
 
-        tuple<vector<float>, vector<float>, vector<pair<int, int>>> result = mt_tracker.myFunction(Abd[m], Abd[n]);
 
         vector<float> leaf_abd;//Leaf node abundance
         vector<float> ans_abd;//Ancestral node abundance
         vector<pair<int,int>> vir_id;//Virtual code
-        tie(leaf_abd, ans_abd, vir_id)=result;
+        tie(leaf_abd, ans_abd, vir_id) = mt_tracker.myFunction(Abd[m], Abd[n]);
 
         float sum = 0;
         for(int i=0; i< k; i++){
@@ -494,7 +495,7 @@ void Multi_Comp_Table(_Table_Format abd_table){
             //Calculate the similarity between Abd2 and ANS
             float sim2 = mt_tracker.Ans_sim(Abd[n], leaf_abd, count, ANS_info);
             if (Is_sim)
-                sim_matrix[p] = (sim1 - sim2)*(sim1 + sim2);
+                sim_matrix[p] = sim1 * sim1 - sim2 * sim2;
             else
                 sim_matrix[p] = sim1 - sim2 + 1;
         }
