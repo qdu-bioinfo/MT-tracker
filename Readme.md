@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Microbial transition tracker (MT-Tracker) is an easy-to-use bioinformatic package designed to analyze microbial transition patterns. ME-Tracker enables the qualitative and quantitative exploration of microbial community transition. MT-Tracker works as a plug-in tool for Parallel-META 3 and supports both 16S rRNA amplicon sequences and whole-genome sequencing (WGS) data as input.
+Microbial transition tracker (MT-Tracker) is an easy-to-use bioinformatic package designed to analyze microbial transition patterns. ME-Tracker enables the qualitative and quantitative exploration of microbial community transition. MT-Tracker works as a plug-in tool for [Parallel-Meta Suite](https://github.com/qdu-bioinfo/parallel-meta-suite) and supports both 16S rRNA amplicon sequences and whole-genome sequencing (WGS) data as input.
 
 ## Software Requirement and Dependency
 
@@ -62,9 +62,7 @@ make
 
 With a input 16S rRNA amplicon sequence file, e.g. sample1.fasta:
 
-**a. Profiling by **
-
-[Parallel-Meta Suite]: https://github.com/qdu-bioinfo/parallel-meta-suite
+**a. Profiling by Parallel-Meta Suite **
 
 ** **
 
