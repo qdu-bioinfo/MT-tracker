@@ -1,37 +1,102 @@
-###MT-tracker installer
-###Bioinformatics Group, Qingdao University
-###Updated at Jan. 16, 2025
-###Updated by Wenjie Zhu,  Xiaoquan Su
 #!/bin/bash
+# MT-tracker Installer
+# Bioinformatics Group, Qingdao University
+# Updated at Jan. 16, 2025
+# Updated by Wenjie Zhu, Xiaoquan Su
 
-###Check Parallel-Meta environment variable###
-if [ $ParallelMETA ]
-    then
-    echo -e "\n**Parallel-Meta is already installed**"
+#########################################
+# 1. Determine the shell configuration file
+#########################################
+if [[ $SHELL = '/bin/zsh' ]]; then
+    CONFIG_FILE=~/.zshrc
+    if [ ! -f "$CONFIG_FILE" ]; then
+        CONFIG_FILE=~/.zsh_profile
+        if [ ! -f "$CONFIG_FILE" ]; then
+            touch $CONFIG_FILE
+        fi
+    fi
 else
-    echo -e "\n**Please install latest version of Parallel-Meta**"
-    exit
+    CONFIG_FILE=~/.bashrc
+    if [ ! -f "$CONFIG_FILE" ]; then
+        CONFIG_FILE=~/.bash_profile
+        if [ ! -f "$CONFIG_FILE" ]; then
+            touch $CONFIG_FILE
+        fi
+    fi
 fi
 
-###Build source code for src package###
-echo -e "\n**MT-tracker Installation**"
-echo -e "\n**MT-tracker src package build**"
-make
-echo -e "\n**Build Complete**"
+#########################################
+# 2. Set installation path and system version
+#########################################
+MT_PATH=`pwd`
+Sys_ver=`uname`
 
-###Plugin installation###
-echo -e "\n**Plugin Installation**"
-cp bin/PM-Mt-tracker $ParallelMETA/bin
-tar -xzvf metaphlan2.tar.gz
-cp -rf mip_16s $ParallelMETA/databases
+#########################################
+# 3. Check for existing MTTRACKER environment variable and PATH settings in the config file
+#########################################
+Old_MT=`grep "export MTTRACKER" $CONFIG_FILE | awk -F '=' '{print $1}'`
+Old_PATH=`grep "MTTRACKER/bin" $CONFIG_FILE | sed 's/\(.\).*/\1/' | awk '{if($1!="#"){print "True";}}'`
+Disable_Prefix="####DisabledbyMTtracker####"
 
-##Check database configuration##
-Check_db_config=`grep -c "MetaPhlAn2" $ParallelMETA/databases/db.config`
-if [ "$Check_db_config" = "0" ]
-    then
-    cp $ParallelMETA/databases/db.config $ParallelMETA/databases/.db.config.bk
-    cat $ParallelMETA/databases/.db.config.bk db.config > $ParallelMETA/databases/db.config
+echo "**MT-tracker Installation**"
+echo "**Version 1.0**"
+echo "**Updated at Jan. 16, 2025**"
+
+#########################################
+# 4. Build the source code if a Makefile exists
+#########################################
+if [ -f "Makefile" ]; then
+    echo -e "\n**MT-tracker src package build**"
+    make
+    echo -e "\n**Build Complete**"
+else
+    echo -e "\n**MT-tracker bin package**"
 fi
 
+#########################################
+# 5. Configure the MTTRACKER environment variable in the config file
+#########################################
+if [ "$Old_MT" != "" ]; then
+    Current_MT=`grep ^export\ MTTRACKER $CONFIG_FILE | awk -F '=' '{print $2}'`
+    if [ "$Current_MT" != "$MT_PATH" ]; then
+        if [ "$Sys_ver" = "Darwin" ]; then
+            sed -i "" "s/^export\ MTTRACKER/$Disable_Prefix\ &/g" $CONFIG_FILE
+            sed -i "" -e "`grep -n "$Disable_Prefix" $CONFIG_FILE | cut -d ":" -f 1 | head -1` a\\
+export MTTRACKER=$MT_PATH
+" $CONFIG_FILE
+        else
+            sed -i "s/^export\ MTTRACKER/$Disable_Prefix\ &/g" $CONFIG_FILE
+            sed -i "/$Disable_Prefix\ export\ MTTRACKER/a export MTTRACKER=$MT_PATH" $CONFIG_FILE
+        fi
+    fi
+else
+    echo "export MTTRACKER=$MT_PATH" >> $CONFIG_FILE
+fi
+
+#########################################
+# 6. Append MTTRACKER/bin to PATH if not already present
+#########################################
+if [ "$Old_PATH" = "" ]; then
+    echo 'export PATH="$PATH:$MTTRACKER/bin"' >> $CONFIG_FILE
+fi
+
+#########################################
+# 7. Source the configuration file to load the new environment variables
+#########################################
+if [[ $SHELL = '/bin/zsh' ]]; then
+    source ~/.zshrc
+    source ~/.zsh_profile
+    echo -e "\n**Environment Variables Configuration Complete**"
+else
+    source ~/.bash_profile
+    source ~/.bashrc
+    echo -e "\n**Environment Variables Configuration Complete**"
+fi
+#Shell
+exec $SHELL
+
+#########################################
+# 8. Final installation message
+#########################################
 echo -e "\n**MT-tracker Installation Complete**"
 echo -e "\n**An example dataset with demo script is available in \"example\"**"

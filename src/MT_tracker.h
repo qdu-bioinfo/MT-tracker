@@ -151,7 +151,7 @@ unordered_map<string, unordered_map<string, float>> _Mt_Tracker::Load_ANS(const 
     string line;
     vector<string> columnNames;
 
-    // 读取文件的第一行，获取列名称
+
     if (getline(infile, line)) {
         istringstream iss(line);
         string columnName;
@@ -160,7 +160,7 @@ unordered_map<string, unordered_map<string, float>> _Mt_Tracker::Load_ANS(const 
         }
     }
 
-    // 逐行读取数据，填充嵌套哈希表
+
     while (getline(infile, line)) {
         istringstream iss(line);
         string rowName;
@@ -251,29 +251,29 @@ float _Mt_Tracker:: calculate_data(const vector<string>& sample1, const vector<s
 }
 
 void _Mt_Tracker::normalize_and_transform(std::vector<float>& data) {
-    // 获取最大值和最小值
+
     float data_max = *std::max_element(data.begin(), data.end());
     float data_min = *std::min_element(data.begin(), data.end());
     float e = 0.01;
 
-    // 保存原始符号
+
     std::vector<int> signs(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
-        signs[i] = (data[i] >= 0) ? 1 : -1;  // 记录符号
-        data[i] = std::abs(data[i]);        // 取绝对值
+        signs[i] = (data[i] >= 0) ? 1 : -1;
+        data[i] = std::abs(data[i]);
     }
 
-    // 归一化数据
+
     for (float& value : data) {
         value = e + (1 - 2 * e) * (value - data_min) / (data_max - data_min);
     }
 
-    // 对数变换
+
     for (float& value : data) {
         value = 1 - log(value + 1);
     }
 
-    // 恢复符号
+
     for (size_t i = 0; i < data.size(); ++i) {
         data[i] *= signs[i];
     }
@@ -360,17 +360,7 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
     float Reg_2[REG_SIZE] = {0};
     int vir[REG_SIZE] = {0};
     float total = 0;
-//    // 输出 ANS_info 的内容
-//    std::cout << "ANS_info content:" << std::endl;
-//    for (const auto& row : ANS_info) {
-//        for (size_t col = 0; col < row.size(); ++col) {
-//            std::cout << row[col];
-//            if (col < row.size() - 1) {
-//                std::cout << ", ";
-//            }
-//        }
-//        std::cout << std::endl;
-//    }
+
     for(int i = 0, k = 0; i < OrderN; i++){
 
         int order_1 = Order_1[i];
@@ -388,11 +378,11 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
         vir[order_d] = i;
 
 
-        float c1_1 = 0;//第一个菌，在第一个菌群的丰度
-        float c1_2 = 0;//第一个菌，在第二个菌群的丰度
+        float c1_1 = 0;
+        float c1_2 = 0;
 
-        float c2_1 = 0;//第二个菌，在第一个菌群的丰度
-        float c2_2 = 0;//第二个菌，在第二个菌群的丰度
+        float c2_1 = 0;
+        float c2_2 = 0;
 
         if (order_1 >= 0){
 
@@ -423,23 +413,23 @@ float _Mt_Tracker::Ans_sim(float * Abd_1, vector<float> Abd_2, int j, vector<vec
         total += min_1;
         total += min_2;
 
-        // 统一处理节点匹配逻辑
+
         auto get_node = [&](int order) {
             return (order >= 0) ? order : vir[order + REG_SIZE];
         };
         const bool is_match = (get_node(order_1) == child_left) &&
                               (get_node(order_2) == child_right);
 
-        // 计算基准值
+
         const float base_value = (c1_2 - min_1) * dist_1
                                  + (c2_2 - min_2) * dist_2;
 
-        // 更新寄存器值
+
         Reg_2[order_d] = base_value + (is_match ? abd : 0);
         Reg_1[order_d] = (c1_1 - min_1) * dist_1
                          + (c2_1 - min_2) * dist_2;
 
-        // 更新k值
+
         k += is_match ? 1 : 0;
     }
 
@@ -529,21 +519,6 @@ tuple<vector<float>, vector<float>, vector<pair<int, int>>> _Mt_Tracker::myFunct
 
         Reg[order_d] = (temp_1 < temp_2)?temp_1:temp_2;
 
-
-
-
-//        if(order_1<0 && order_2 < 0){
-//            ans.emplace_back(vir[order_1+ REG_SIZE],vir[order_2+ REG_SIZE]);
-//        }
-//        if(order_1>=0&&order_2<0){
-//            ans.emplace_back(order_1,vir[order_2+ REG_SIZE]);
-//        }
-//        if(order_1>=0&&order_2>=0){
-//            ans.emplace_back(order_1,order_2);
-//        }
-//        if(order_1<0&&order_2>=0){
-//            ans.emplace_back(vir[order_1+ REG_SIZE],order_2);
-//        }
         auto getNode = [&vir](int order) -> int {
             return (order >= 0) ? order : vir[order + REG_SIZE];
         };

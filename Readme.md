@@ -6,11 +6,17 @@ Microbial transition tracker (MT-Tracker) is an easy-to-use bioinformatic packag
 
 ## Software Requirement and Dependency
 
-MT-Tracker requires Parallel-Meta-Suite, please refer to https://github.com/qdu-bioinfo/parallel-meta-suite#installation-guide for installation.
+#### Software requirements
+
+OpenMP library is the C/C++ parallel computing library. Most Linux releases have OpenMP already been installed in the system. In Mac OS X, to install the compiler that supports OpenMP, we recommend using the Homebrew package manager:
+
+```
+brew install gcc
+```
 
 ## Installation Guide
 
-#### MT-Tracker provides a fully automatic installer for easy installation.
+#### Automatic installation (recommended)
 
 **a. Download the package**
 
@@ -27,11 +33,40 @@ source install.sh
 
 The package should take less than 1 minute to install on a computer with the specifications recommended above.
 
+#### Manual installation
+
+If the automatic installer fails, MT-tracker can still be installed manually.
+
+**a. Download the package**
+
+```
+git clone https://github.com/qdu-bioinfo/MT-tracker.git
+```
+
+**b. Configure the environment variables (the default environment variable configuration file is “~/.bashrc”)**
+
+```
+export MTTRACKER=Path to MT-tracker
+export PATH="$PATH:$MTTRACKER/bin"
+source ~/.bashrc
+```
+
+**c. Compile the source code**
+
+```
+cd MT-tracker
+make
+```
+
 ## Basic Usage
 
 With a input 16S rRNA amplicon sequence file, e.g. sample1.fasta:
 
-**a. Profiling by Parallel-META **
+**a. Profiling by **
+
+[Parallel-Meta Suite]: https://github.com/qdu-bioinfo/parallel-meta-suite
+
+** **
 
 ```
 PM-parallel-meta -r sample1.fasta -o sample1.out
@@ -42,7 +77,7 @@ The “sample1.out” folder is the profiling result.
 **b. Calculate the virtual ancestor and transition direction between two samples.**
 
 ```
-PM-Mt-tracker -i sample1.out/classification1.txt sample1.out/classification2.txt
+Mt-tracker -i sample1.out/classification1.txt sample1.out/classification2.txt
 ```
 
 ## Batch Processing
@@ -52,7 +87,7 @@ MT-Tracker also supports the batch input of profiling results by the following a
 **a. Sample list**
 
 ```
-PM-Mt-tracker -l samples.list -o samples.mtt
+Mt-tracker -l samples.list -o samples.mtt
 ```
 
 in which parameter “-l” assigns the file list of profiling results of multiple samples. The format of a sample list:
@@ -67,7 +102,7 @@ SampleN	/home/data/sampleN.out/classification.txt
 **b. Abundance tables**
 
 ```
-PM-Mt-tracker -T samples.OTU.Abd -o samples.mtt
+Mt-tracker -T samples.OTU.Abd -o samples.mtt
 ```
 
 in which parameter “-T” assigns the profiling result of OTU table of multiple samples. The format of a OTU table:
@@ -84,7 +119,7 @@ OTU3	50	80	0	200
 For multiple samples, after calibration and normalization, the transition probabilities among multiple samples are obtained. Input the samples.mtt file and the corresponding meta file.
 
 ```
-PM-Mt-tracker -g samples.mtt samples.meta -o output.txt
+Mt-tracker -g samples.mtt samples.meta -o output.txt
 ```
 
 ## Example Dataset
@@ -93,14 +128,13 @@ Here we provide a demo dataset with profiling results of 40 microbiome and corre
 
 ```
 ls example
-samples.meta  samples.OTU.Abd
 ```
 
 or type the following command:
 
 ```
-PM-Mt-tracker -T samples.OTU.Abd -o samples.mtt
-PM-Mt-tracker -g samples.mtt samples.meta -o output.txt
+Mt-tracker -T samples.OTU.Abd -o samples.mtt
+Mt-tracker -g samples.mtt samples.meta -o output.txt
 ```
 
-For other options, use PM-Mt-tracker -h to view.
+For other options, use Mt-tracker -h to view

@@ -56,7 +56,7 @@ int printhelp(){
     cout << "MT-tracker [Option] Value" << endl;
     cout << "Options: " << endl;
     cout << "\t-D (upper) Reference database, default is G (Greangenes13_97%)"<< endl;
-    cout << "m (MetaPhlAn2), Q (Greangenes2),g (Greangenes13_99%),Comply with PMS database."<< endl;
+    cout << "m (MetaPhlAn2)"<< endl;
 
     cout << "\t  -i Two samples path for single sample transition" << endl;
     cout << "\tor" << endl;

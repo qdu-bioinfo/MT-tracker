@@ -26,18 +26,16 @@ using namespace std;
 
 string Check_Env(){
     
-    if (getenv("ParallelMETA") == NULL){
+    if (getenv("MTTRACKER") == NULL){
                                
-                               cerr << "Error: Please set the environment variable \"ParallelMETA\" to the directory" << endl;
+                               cerr << "Error: Please set the environment variable \"MTTRACKER\" to the directory" << endl;
                                exit(0);
                                
                                    }
     
-    string path =  getenv("ParallelMETA");
+    string path =  getenv("MTTRACKER");
     return path;
-    
-    //debug
-    //return "/opt/tools/parallel-meta/";
+
     }
 
 int Check_Path(const char * path, int type){

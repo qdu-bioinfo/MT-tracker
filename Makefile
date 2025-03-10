@@ -1,12 +1,13 @@
 CC:=g++
 ifneq (,$(findstring Darwin,$(shell uname)))
-      CC:=g++-9
+    CC := $(shell brew list --versions gcc | awk '{print $$2}' | cut -d'.' -f1 | awk '{print "g++-"$$1; exit}')
 endif
 INCLUDEFLG=-I ./include/
 OMPFLG=-fopenmp
 HASHFLG=-Wno-deprecated
-BUILDFLG=-w -ffunction-sections -fdata-sections -fmodulo-sched -msse
-EXE_MIP=bin/PM-Mt-tracker
+OPTFLAG ?= -O3
+BUILDFLG=$(OPTFLAG) -w -ffunction-sections -fdata-sections -fmodulo-sched -msse
+EXE_MIP=bin/Mt-tracker
 
 all:
 	$(CC) -o $(EXE_MIP) src/MT_tracker.cpp $(INCLUDEFLG) $(HASHFLG) $(BUILDFLG) $(OMPFLG)
