@@ -6,7 +6,7 @@ INCLUDEFLG=-I ./include/
 OMPFLG=-fopenmp
 HASHFLG=-Wno-deprecated
 OPTFLAG ?= -O3
-BUILDFLG=$(OPTFLAG) -w -ffunction-sections -fdata-sections -fmodulo-sched -msse
+BUILDFLG=$(OPTFLAG) -w -ffunction-sections -fdata-sections -fmodulo-sched
 EXE_MIP=bin/Mt-tracker
 
 all:

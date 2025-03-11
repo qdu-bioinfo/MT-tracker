@@ -141,7 +141,7 @@ return 0;
 }
 //Progress bar function
 void display_progress_bar(std::atomic<long> &progress, long total, int bar_width = 50) {
-    const char postfix[] = {'||', '//', '=', '\\'};
+    const char postfix[] = {'|', '/', '=', '\\'};
     while (progress < total) {
         int completed = progress * bar_width / total; // Length of completed section
         std::string bar(completed, '#');

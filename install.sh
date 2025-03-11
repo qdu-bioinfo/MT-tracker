@@ -83,17 +83,8 @@ fi
 #########################################
 # 7. Source the configuration file to load the new environment variables
 #########################################
-if [[ $SHELL = '/bin/zsh' ]]; then
-    source ~/.zshrc
-    source ~/.zsh_profile
-    echo -e "\n**Environment Variables Configuration Complete**"
-else
-    source ~/.bash_profile
-    source ~/.bashrc
-    echo -e "\n**Environment Variables Configuration Complete**"
-fi
-#Shell
-exec $SHELL
+source $CONFIG_FILE
+echo -e "\n**Environment Variables Configuration Complete**"
 
 #########################################
 # 8. Final installation message
