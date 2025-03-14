@@ -104,10 +104,10 @@ Mt-tracker -T samples.OTU.Abd -o samples.mtt
 in which parameter “-T” assigns the profiling result of OTU table of multiple samples. The format of a OTU table:
 
 ```
-SampleID	Sample1	Sample2	Sample3	
-OTU1	100	200	0	50
-OTU2	0	300	600	100
-OTU3	50	80	0	200
+SampleID	Sample1	Sample2	Sample3	Sample4
+OTU1		100		200		0		50
+OTU2		0		300		600		100
+OTU3		50		80		0		200
 ```
 
 ## Calculate the transition direction and probability between multiple samples
